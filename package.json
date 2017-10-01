@@ -1,0 +1,19 @@
+{
+  "name": "lambda-telegram",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "AWS_PROFILE=personal claudia test-lambda",
+    "start": "AWS_PROFILE=personal claudia create --name telegram --region eu-west-1 --handler index.handler",
+    "deploy": "AWS_PROFILE=personal claudia update",
+    "log": "AWS_PROFILE=personal aws logs filter-log-events --log-group-name /aws/lambda/telegram",
+    "destroy": "AWS_PROFILE=personal claudia destroy"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {
+    "telegram-bot-api": "^1.2.0"
+  }
+}
