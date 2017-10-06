@@ -15,7 +15,7 @@ log-motion-deactivated:
 	serverless logs -f telegramMotionDeactivated -t
 
 log-command:
-	@echo "get notify logging"
+	@echo "get comand logging"
 	serverless logs -f telegramCommand -t
 
 log-photo:

@@ -12,68 +12,138 @@ const admin = process.env.ADMIN_USERNAME;
 const bot = new telegram({
   token: process.env.API_TOKEN
 });
-const regex = /^\/.*/g;
+
+function sendMessage(msg, callback){
+  bot.sendMessage({
+    chat_id: notificationChat,
+    text: msg
+  }).then(function(data){
+    console.log(data);
+    callback(null, {
+      statusCode: 200
+    });
+  }).catch(function(err){
+    callback(null, {
+      statusCode: 500
+    });
+  });
+}
+
+function updateThingShadow(thingName, data, callback){
+  iotdata.updateThingShadow({
+    thingName: thingName,
+    payload: JSON.stringify({
+      state: {
+        desired: data
+      }
+    }),
+  }, function(err, data){
+    if(err){
+      console.error("Error updating shadow");
+      callback(err);
+    }else{
+      console.log(data);
+      sendMessage(process.env.MSG_ACK, callback);
+    }
+  });
+}
+
+function publishOnTopic(topic, message, callback){
+  iotdata.publish({
+    topic: topic,
+    payload: message,
+    qos: 0
+  }, function(err, data){
+    if(err){
+      console.error("Error publishing message");
+      callback(err);
+    }else{
+      console.log(data);
+      sendMessage(process.env.MSG_ACK, callback);
+    }
+  });
+}
+
+function getThingShadow(thingName, callback){
+  iotdata.getThingShadow({
+    thingName: "DHT11"
+  }, function(err, data){
+    if(err){
+      console.error("Error publishing message");
+      callback(err);
+    }else{
+      console.log(data);
+      callback(null, data);
+    }
+  });
+}
 
 module.exports.elaborateCommand = (event, context, callback) => {
 
   let message = event.body.message;
+  let regex = /^\/.*/g;
   console.log(message);
 
   if(message.from.username == admin){
 
-    if(regex.test(message.text)){
+    if(regex.test(message.text) == true){
 
       switch (message.text) {
+        case "/start":
+          sendMessage(process.env.MSG_WELCOME, callback);
+          break;
         case "/temp":
-          module.exports.getTemperature(event, context, callback)
+          getThingShadow("DHT11", function(err, data){
+            if(err){
+              callback(err);
+            }else{
+              sendMessage(data.temperature+"C°", callback);
+            }
+          })
           break;
         case "/hum":
-          module.exports.getTemperature(event, context, callback)
+          getThingShadow("DHT11", function(err, data){
+            if(err){
+              callback(err);
+            }else{
+              sendMessage(data.humidity+"%", callback);
+            }
+          })
           break;
         case "/buzz":
-          module.exports.ring(event, context, callback)
+          publishOnTopic('ring', JSON.stringify({
+            timeout: 2000
+          }, callback))
           break;
         case "/photo":
-          module.exports.shootPhoto(event, context, callback)
+          publishOnTopic('camera-shoot-photo', "", callback)
           break;
         case "/alarm on":
-          module.exports.enableAlarm(event, context, callback)
+          updateThingShadow('Motion', {
+            enable: 1
+          }, callback)
           break;
         case "/alarm off":
-          module.exports.disableAlarm(event, context, callback)
+          updateThingShadow('Motion', {
+            enable: 0
+          }, callback)
+          break;
+        case "/led on":
+          updateThingShadow('Led', {
+            active: 1
+          }, callback)
+          break;
+        case "/led off":
+          updateThingShadow('Led', {
+            active: 0
+          }, callback)
           break;
         default:
-          bot.sendMessage({
-            chat_id: notificationChat,
-            text: MSG_NOT_A_COMMAND
-          }).then(function(data){
-            console.log(data);
-            callback(null, {
-              statusCode: 200
-            });
-          }).catch(function(err){
-            callback(null, {
-              statusCode: 500
-            });
-          });
+          sendMessage(process.env.MSG_COMMAND_NOT_FOUND, callback);
       }
 
     }else{
-
-      bot.sendMessage({
-        chat_id: notificationChat,
-        text: process.env.MSG_COMMAND_NOT_FOUND
-      }).then(function(data){
-        console.log(data);
-        callback(null, {
-          statusCode: 200
-        });
-      }).catch(function(err){
-        callback(null, {
-          statusCode: 500
-        });
-      });
-
+      sendMessage(process.env.MSG_NOT_A_COMMAND, callback);
     }
 
   }else{
@@ -84,173 +154,3 @@ module.exports.elaborateCommand = (event, context, callback) => {
   }
 
 };
-
-module.exports.getTemperature = (event, context, callback) => {
-  iotdata.getThingShadow({
-    thingName: "DHT11"
-  }, function(err, data){
-    if(err){
-      console.error("Error publishing message");
-      callback(err);
-    }else{
-      console.log(data);
-
-      bot.sendMessage({
-        chat_id: notificationChat,
-        text: data.temperature+"C"
-      }).then(function(data){
-        console.log(data);
-        callback(null, {
-          statusCode: 200
-        });
-      }).catch(function(err){
-        callback(null, {
-          statusCode: 500
-        });
-      });
-    }
-  });
-}
-
-module.exports.getHumidity = (event, context, callback) => {
-  iotdata.getThingShadow({
-    thingName: "DHT11"
-  }, function(err, data){
-    if(err){
-      console.error("Error getting shadow");
-      callback(err);
-    }else{
-      console.log(data);
-
-      bot.sendMessage({
-        chat_id: notificationChat,
-        text: data.humidity+"%"
-      }).then(function(data){
-        console.log(data);
-        callback(null, {
-          statusCode: 200
-        });
-      }).catch(function(err){
-        callback(null, {
-          statusCode: 500
-        });
-      });
-    }
-  });
-}
-
-module.exports.ring = (event, context, callback) => {
-  iotdata.publish({
-    topic: 'ring',
-    payload: JSON.stringify({
-      timeout: 2000
-    }),
-    qos: 0
-  }, function(err, data){
-    if(err){
-      console.error("Error publishing message");
-      callback(err);
-    }else{
-      console.log(data);
-
-      bot.sendMessage({
-        chat_id: notificationChat,
-        text: process.env.MSG_RINGING
-      }).then(function(data){
-        console.log(data);
-        callback(null, {
-          statusCode: 200
-        });
-      }).catch(function(err){
-        callback(null, {
-          statusCode: 500
-        });
-      });
-    }
-  });
-}
-
-module.exports.shootPhoto = (event, context, callback) => {
-  iotdata.publish({
-    topic: 'camera-shoot-photo',
-    payload: "",
-    qos: 0
-  }, function(err, data){
-    if(err){
-      console.error("Error publishing message");
-      callback(err);
-    }else{
-      console.log(data);
-
-      callback(null, data);
-    }
-  });
-}
-
-module.exports.enableAlarm = (event, context, callback) => {
-  iotdata.updateThingShadow({
-    thingName: 'Motion',
-    payload: JSON.stringify({
-      state: {
-        desired: {
-          enable: 1
-        }
-      }
-    }),
-  }, function(err, data){
-    if(err){
-      console.error("Error updating shadow");
-      callback(err);
-    }else{
-      console.log(data);
-
-      bot.sendMessage({
-        chat_id: notificationChat,
-        text: process.env.MSG_ALARM_ENABLED
-      }).then(function(data){
-        console.log(data);
-        callback(null, {
-          statusCode: 200
-        });
-      }).catch(function(err){
-        callback(null, {
-          statusCode: 500
-        });
-      });
-    }
-  });
-}
-
-module.exports.disableAlarm = (event, context, callback) => {
-  iotdata.updateThingShadow({
-    thingName: 'Motion',
-    payload: JSON.stringify({
-      state: {
-        desired: {
-          enable: 0
-        }
-      }
-    }),
-  }, function(err, data){
-    if(err){
-      console.error("Error updating shadow");
-      callback(err);
-    }else{
-      console.log(data);
-
-      bot.sendMessage({
-        chat_id: notificationChat,
-        text: process.env.MSG_ALARM_DISBLED
-      }).then(function(data){
-        console.log(data);
-        callback(null, {
-          statusCode: 200
-        });
-      }).catch(function(err){
-        callback(null, {
-          statusCode: 500
-        });
-      });
-    }
-  });
-}

@@ -16,6 +16,7 @@ provider:
 
   environment:
     API_TOKEN: ${env:API_TOKEN}
+    NOTIFICATION_CHAT: ${env:NOTIFICATION_CHAT}
 
   iamRoleStatements:
     -  Effect: "Allow"
@@ -32,8 +33,6 @@ provider:
 functions:
   telegramSendPhoto:
     handler: photo.handler
-    environment:
-      NOTIFICATION_CHAT: ${env:NOTIFICATION_CHAT}
     events:
       - s3:
           bucket: ${env:PHOTO_BUCKET}
@@ -42,35 +41,31 @@ functions:
   telegramMotionActivated:
     handler: notify.motionActivated
     environment:
-      NOTIFICATION_CHAT: ${env:NOTIFICATION_CHAT}
       MSG_MOTION_ACTIVATED: ${env:MSG_MOTION_ACTIVATED}
       IOT_HOST: ${env:IOT_HOST}
     events:
       - iot:
-          sql: "SELECT state.isInAlarm FROM '$aws/things/Motion/shadow/update/delta' WHERE state.isInAlarm = 1"
+          sql: "SELECT * FROM 'motion-acivated'"
           enabled: true
 
   telegramMotionDeactivated:
     handler: notify.motionDectivated
     environment:
-      NOTIFICATION_CHAT: ${env:NOTIFICATION_CHAT}
       MSG_MOTION_DEACTIVATED: ${env:MSG_MOTION_DEACTIVATED}
     events:
       - iot:
-          sql: "SELECT state.isInAlarm FROM '$aws/things/Motion/shadow/update/delta' WHERE state.isInAlarm = 0"
+          sql: "SELECT * FROM 'motion-deactivated'"
           enabled: true
 
   telegramCommand:
     handler: command.elaborateCommand
     environment:
       ADMIN_USERNAME: ${env:ADMIN_USERNAME}
-      NOTIFICATION_CHAT: ${env:NOTIFICATION_CHAT}
       IOT_HOST: ${env:IOT_HOST}
       MSG_NOT_A_COMMAND: ${env:MSG_NOT_A_COMMAND}
       MSG_COMMAND_NOT_FOUND: ${env:MSG_COMMAND_NOT_FOUND}
-      MSG_RINGING: ${env:MSG_RINGING}
-      MSG_ALARM_ENABLED: ${env:MSG_ALARM_ENABLED}
-      MSG_ALARM_DISBLED: ${env:MSG_ALARM_DISBLED}
+      MSG_WELCOME: ${env:MSG_WELCOME}
+      MSG_ACK: ${env:MSG_ACK}
     events:
       - http:
           path: bot/update
