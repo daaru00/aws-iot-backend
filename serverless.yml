@@ -17,6 +17,7 @@ provider:
   environment:
     API_TOKEN: ${env:API_TOKEN}
     NOTIFICATION_CHAT: ${env:NOTIFICATION_CHAT}
+    IOT_HOST: ${env:IOT_HOST}
 
   iamRoleStatements:
     -  Effect: "Allow"
@@ -42,7 +43,6 @@ functions:
     handler: notify.motionActivated
     environment:
       MSG_MOTION_ACTIVATED: ${env:MSG_MOTION_ACTIVATED}
-      IOT_HOST: ${env:IOT_HOST}
     events:
       - iot:
           sql: "SELECT * FROM 'motion-acivated'"
@@ -61,7 +61,6 @@ functions:
     handler: command.elaborateCommand
     environment:
       ADMIN_USERNAME: ${env:ADMIN_USERNAME}
-      IOT_HOST: ${env:IOT_HOST}
       MSG_NOT_A_COMMAND: ${env:MSG_NOT_A_COMMAND}
       MSG_COMMAND_NOT_FOUND: ${env:MSG_COMMAND_NOT_FOUND}
       MSG_WELCOME: ${env:MSG_WELCOME}
