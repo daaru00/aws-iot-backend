@@ -5,7 +5,7 @@ service: aws-nodejs
 
 package:
   include:
-    - iot_keys
+    - lib
 
 provider:
   name: aws
@@ -46,6 +46,15 @@ functions:
     events:
       - iot:
           sql: "SELECT * FROM 'motion-acivated'"
+          enabled: true
+
+  telegramButtonClicked:
+    handler: button.handler
+    environment:
+      MSG_BUTTON_CLICKED: ${env:MSG_BUTTON_CLICKED}
+    events:
+      - iot:
+          sql: "SELECT * FROM 'button-click'"
           enabled: true
 
   telegramMotionDeactivated:

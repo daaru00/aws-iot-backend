@@ -6,7 +6,6 @@
 
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
-const iotdata = new AWS.IotData({endpoint: process.env.IOT_HOST});
 
 const fs = require('fs');
 const telegram = require('telegram-bot-api');
