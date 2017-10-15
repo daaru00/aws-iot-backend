@@ -22,7 +22,7 @@ provider:
   iamRoleStatements:
     -  Effect: "Allow"
        Action:
-         - "s3:GetObject"
+         - "s3:Get*"
        Resource:
          - "arn:aws:s3:::${env:PHOTO_BUCKET}/*"
     - Effect: "Allow"

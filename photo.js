@@ -19,7 +19,7 @@ module.exports.handler = (event, context, callback) => {
   console.log(data);
 
   var bucket = data.bucket.name;
-  var key = data.object.key;
+  var key = decodeURIComponent(data.object.key);
   var tmpFile = '/tmp/'+key;
 
   var file = fs.createWriteStream(tmpFile);
