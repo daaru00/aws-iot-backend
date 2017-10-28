@@ -60,7 +60,7 @@ make deploy
 
 Once deployed set the Telegram Bot Webhook as the `telegramCommand` Lambda API Endpoint executing a simple HTTP request
 ```bash
-curl https://api.telegram.org/<bot token>/setWebHook?url=<telegramCommand endpoint>
+curl https://api.telegram.org/bot<bot token>/setWebHook?url=<telegramCommand endpoint>
 ```
 
 ### Commands
