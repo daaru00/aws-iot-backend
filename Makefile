@@ -1,6 +1,6 @@
 include .env
 
-.PHONY: deploy log-command log-motion-activated log-motion-deactivate log-photo
+.PHONY: deploy log-command log-motion-activated log-motion-deactivated log-photo
 
 deploy:
 	@echo "deploy project"
