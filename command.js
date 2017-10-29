@@ -44,7 +44,7 @@ module.exports.elaborateCommand = (event, context, callback) => {
           case "/buzz":
             iot.publishOnTopic('buzzer-ring', JSON.stringify({
               timeout: 2000
-            }, callback))
+            }),callback);
             break;
           case "/photo":
             iot.publishOnTopic('camera-shoot-photo', "", callback)
