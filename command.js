@@ -41,6 +41,15 @@ module.exports.elaborateCommand = (event, context, callback) => {
               }
             })
             break;
+          case "/modem":
+            iot.getThingShadow("Modem", function(err, data){
+              if(err){
+                callback(err);
+              }else{
+                telegram.sendMessage("Download: "+data.download+"Mb/s \nUpload:"+data.upload+"Mb/s \nIP:"+data.publicIP, callback);
+              }
+            })
+            break;
           case "/buzz":
             iot.publishOnTopic('buzzer-ring', JSON.stringify({
               timeout: 2000

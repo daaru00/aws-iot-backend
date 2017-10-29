@@ -57,3 +57,33 @@ module.exports.motionDectivated = (event, context, callback) => {
   })
 
 };
+
+module.exports.adminConnected = (event, context, callback) => {
+
+  iot.updateThingShadow('Motion', {
+    enable: 0
+  }, function(err, data){
+    if(err){
+      console.error("Error publishing message");
+      callback(err);
+    }else{
+      telegram.sendMessage(process.env.MSG_ADMIN_CONNECTED, callback)
+    }
+  })
+
+};
+
+module.exports.adminDisconnected = (event, context, callback) => {
+
+  iot.updateThingShadow('Motion', {
+    enable: 1
+  }, function(err, data){
+    if(err){
+      console.error("Error publishing message");
+      callback(err);
+    }else{
+      telegram.sendMessage(process.env.MSG_ADMIN_DISCONNECTED, callback)
+    }
+  })
+
+};
