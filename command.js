@@ -46,7 +46,7 @@ module.exports.elaborateCommand = (event, context, callback) => {
               if(err){
                 callback(err);
               }else{
-                telegram.sendMessage("Download: "+data.download+"Mb/s \nUpload:"+data.upload+"Mb/s \nIP:"+data.publicIP, callback);
+                telegram.sendMessage("Download: "+data.download+"Mb/s \nUpload: "+data.upload+"Mb/s \nIP: "+data.publicIP, callback);
               }
             })
             break;
