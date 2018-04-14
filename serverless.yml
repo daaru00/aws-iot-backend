@@ -66,6 +66,24 @@ functions:
           sql: "SELECT * FROM 'motion-deactivated'"
           enabled: true
 
+  telegramAdminConnected:
+    handler: notify.adminConnected
+    environment:
+      MSG_ADMIN_CONNECTED: ${env:MSG_ADMIN_CONNECTED}
+    events:
+      - iot:
+          sql: "SELECT * FROM 'modem-admin-connected'"
+          enabled: true
+
+  telegramAdminDisconnected:
+    handler: notify.adminDisconnected
+    environment:
+      MSG_ADMIN_DISCONNECTED: ${env:MSG_ADMIN_DISCONNECTED}
+    events:
+      - iot:
+          sql: "SELECT * FROM 'modem-admin-disconnected'"
+          enabled: true
+
   telegramCommand:
     handler: command.elaborateCommand
     environment:
